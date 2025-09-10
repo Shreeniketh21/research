@@ -1,0 +1,206 @@
+<LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:layout_marginTop="60dp"
+        android:padding="16dp">
+
+        <!-- Title -->
+        <TextView
+            android:id="@+id/titleTextView"  
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="QUICK CONTACT"
+            android:textSize="24sp"
+            android:textStyle="bold"
+            android:textColor="#000000"
+            android:gravity="center"
+            android:layout_marginBottom="24dp" />
+
+        <!-- Name Field -->
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Name"
+            android:textSize="20sp"
+            android:textColor="#000000"
+            android:layout_marginBottom="4dp" />
+
+        <EditText
+            android:id="@+id/nameEditText" //ADD THIS ID FOR EDITTEXT 
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:inputType="textPersonName"
+            android:background="@drawable/edittext_border"
+            android:textColor="@color/black"
+            android:textColorHint="@color/black"
+            android:padding="12dp"
+            android:layout_marginBottom="16dp" />
+
+        <!-- Email Field -->
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Email"
+            android:textSize="16sp"
+            android:textColor="#000000"
+            android:layout_marginBottom="4dp" />
+
+        <EditText
+            android:id="@+id/emailEditText"  //ADD THIS ID FOR EDITTEXT 
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:inputType="textEmailAddress"
+            android:background="@drawable/edittext_border"
+            android:padding="12dp"
+            android:textColor="@color/black"
+            android:textColorHint="@color/black"
+            android:layout_marginBottom="16dp" />
+
+        <!-- Message Field -->
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Message"
+            android:textSize="16sp"
+            android:textColor="#000000"
+            android:layout_marginBottom="4dp" />
+
+        <EditText
+            android:id="@+id/messageEditText"  //ADD THIS ID FOR EDITTEXT 
+            android:layout_width="match_parent"
+            android:layout_height="120dp"
+            android:inputType="textMultiLine"
+            android:textColor="@color/black"
+            android:textColorHint="@color/black"
+            android:gravity="top"
+            android:background="@drawable/edittext_border"
+            android:padding="12dp"
+            android:layout_marginBottom="24dp" />
+
+        <!-- Send Button -->
+        <Button
+            android:id="@+id/sendButton"  //ADD THIS ID FOR BUTTON
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Send"
+            android:textAllCaps="false"
+            android:textSize="16sp"
+            android:backgroundTint="#2196F3"
+            android:textColor="#FFFFFF"
+            android:padding="12dp" />
+
+    </LinearLayout>
+
+
+package com.nexdee.java_demo;
+
+import android.os.Bundle;
+import android.view.View;
+import android.widget.Button;
+import android.widget.EditText;
+import android.widget.Toast;
+
+import androidx.appcompat.app.AppCompatActivity;
+
+import java.util.Properties;
+
+import javax.mail.Authenticator;
+import javax.mail.Message;
+import javax.mail.MessagingException;
+import javax.mail.PasswordAuthentication;
+import javax.mail.Session;
+import javax.mail.Transport;
+import javax.mail.internet.InternetAddress;
+import javax.mail.internet.MimeMessage;
+
+public class MainActivity3 extends AppCompatActivity {
+
+    EditText nameEditText, emailEditText, messageEditText;  //ADD THIS 
+    Button sendButton;  //ADD THIS 
+
+    // 🔑 Replace with your Gmail + App Password
+    private static final String SENDER_EMAIL = "dsashree555@gmail.com"; //ADD THIS 
+    private static final String SENDER_PASSWORD = "enwacihxfalvpizm"; // App Password (not normal password) //ADD THIS 
+    private static final String RECEIVER_EMAIL = "nexdee.sd@gmail.com"; //ADD THIS 
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_main3);
+
+        // Get views by ID
+        nameEditText = findViewById(R.id.nameEditText); //ADD THIS 
+        emailEditText = findViewById(R.id.emailEditText); //ADD THIS 
+        messageEditText = findViewById(R.id.messageEditText); //ADD THIS 
+        sendButton = findViewById(R.id.sendButton); //ADD THIS 
+
+        //ADD THIS 
+        // Send button click
+        sendButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                String name = nameEditText.getText().toString().trim();
+                String email = emailEditText.getText().toString().trim();
+                String message = messageEditText.getText().toString().trim();
+
+                if (name.isEmpty() || email.isEmpty() || message.isEmpty()) {
+                    Toast.makeText(MainActivity3.this, "Please fill all fields", Toast.LENGTH_SHORT).show();
+                    return;
+                }
+
+                // Run email sending in background
+                new Thread(() -> sendEmail(name, email, message)).start();
+            }
+        });
+    }
+
+    //ADD THIS 
+    private void sendEmail(String name, String email, String messageText) {
+        try {
+            // SMTP properties
+            Properties props = new Properties();
+            props.put("mail.smtp.auth", "true");
+            props.put("mail.smtp.starttls.enable", "true");
+            props.put("mail.smtp.host", "smtp.gmail.com");
+            props.put("mail.smtp.port", "587");
+
+            // Session with authentication
+            Session session = Session.getInstance(props, new Authenticator() {
+                @Override
+                protected PasswordAuthentication getPasswordAuthentication() {
+                    return new PasswordAuthentication(SENDER_EMAIL, SENDER_PASSWORD);
+                }
+            });
+
+            // Build message
+            Message message = new MimeMessage(session);
+            message.setFrom(new InternetAddress(SENDER_EMAIL, "Quick Contact App"));
+            message.setRecipients(Message.RecipientType.TO, InternetAddress.parse(RECEIVER_EMAIL));
+            message.setSubject("New Contact Form Message");
+            message.setText(
+                    "Name: " + name +
+                            "\nEmail: " + email +
+                            "\n\nMessage:\n" + messageText
+            );
+
+            // Send
+            Transport.send(message);
+
+            // UI update on success
+            runOnUiThread(() -> {
+                Toast.makeText(MainActivity3.this, "Message sent successfully!", Toast.LENGTH_LONG).show();
+                nameEditText.setText("");
+                emailEditText.setText("");
+                messageEditText.setText("");
+            });
+
+        } catch (MessagingException e) {
+            e.printStackTrace();
+            runOnUiThread(() -> Toast.makeText(MainActivity3.this, "Failed to send message", Toast.LENGTH_LONG).show());
+        } catch (Exception ex) {
+            ex.printStackTrace();
+        }
+    }
+    //ADD TILL THIS AND IF ANY ERROR TRY IMPORTING 
+}
