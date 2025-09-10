@@ -1,0 +1,58 @@
+android:onClick="openCall" //just add this one line into that linear layout of Call Us 
+android:onClick="openGmail" //just add this one line into that linear layout of Email Us
+
+package com.nexdee.java_demo;
+
+import android.content.ActivityNotFoundException;
+import android.content.Intent;
+import android.content.pm.PackageManager;
+import android.net.Uri;
+import android.os.Bundle;
+import android.view.View;
+import android.widget.Toast;
+
+import androidx.appcompat.app.AppCompatActivity;
+
+public class MainActivity2 extends AppCompatActivity {
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_main2);
+    }
+
+    // COME OUT OF THE onCreate AND ADD THE BELOW CODE
+    // Called when "Call" button is clicked
+    public void openCall(View view) {
+        try {
+            String phoneNumber = "8296991904"; // your number
+            Intent intent = new Intent(Intent.ACTION_DIAL);
+            intent.setData(Uri.parse("tel:" + phoneNumber));
+            startActivity(intent);
+        } catch (Exception e) {
+            e.printStackTrace();
+            Toast.makeText(this, "No dialer app found", Toast.LENGTH_SHORT).show();
+        }
+    }
+
+    // Called when "Email us" button is clicked
+    public void openGmail(View view) {
+        Intent emailIntent = new Intent(Intent.ACTION_SENDTO);
+        emailIntent.setData(Uri.parse("mailto:")); // Only email apps should handle this
+        emailIntent.putExtra(Intent.EXTRA_EMAIL, new String[]{"nexdee.sd@gmail.com"});
+        emailIntent.putExtra(Intent.EXTRA_SUBJECT, " ");
+        emailIntent.putExtra(Intent.EXTRA_TEXT, " ");
+
+// Specify Gmail package to avoid MIUI blocking
+        emailIntent.setPackage("com.google.android.gm");
+
+        try {
+            startActivity(emailIntent);
+        } catch (ActivityNotFoundException e) {
+            Toast.makeText(this, "Gmail app not installed", Toast.LENGTH_SHORT).show();
+        }
+
+    }
+  //ADD TILL HERE 
+    
+}
